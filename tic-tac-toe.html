@@ -254,11 +254,11 @@
         .ttt-cell.x { color: var(--x-color); }
         .ttt-cell.o { color: var(--o-color); }
         @keyframes ttt-scale-in {
-            from { transform: scale(0.5); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+            from { transform: scale(0.5); opacity: 0 ; }
+            to { transform: scale(1); opacity: 1 ; }
         }
         .winning-cell {
-            animation: win-pulse 0.8s infinite;
+            animation: win-pulse 0.8s infinite !important;
         }
         @keyframes win-pulse {
             0% { background-color: var(--secondary-color); box-shadow: 0 0 20px var(--secondary-color); }
@@ -357,10 +357,18 @@
         .connect4-cell.p1 { background-color: var(--x-color); }
         .connect4-cell.p2 { background-color: var(--o-color); }
         .connect4-col {
-            display: contents;
+            /*display: contents;*/
+            display: flex;
+            flex-direction: column ; /* bottom of array = bottom visually */
+            gap: 3px;
         }
         .connect4-col:hover .connect4-cell:not(.p1):not(.p2) {
              background-color: #2c3e50;
+        }
+        .connect4-cell.winner {
+            box-shadow: 0 0 10px 5px gold;
+            transform: scale(1.1);
+            transition: all 0.3s;
         }
 
         /* --- Hangman --- */
@@ -699,7 +707,7 @@
                     <div id="ttt-status" class="status-display">Choose a mode to start!</div>
                     <div id="ttt-player-info" class="player-info"></div>
                     <div id="ttt-extra-info" class="ttt-stats-container">
-                        <div>Time: <span id="ttt-timer">0s</span></div>
+                        <!--div>Time: <span id="ttt-timer">0s</span></div-->
                         <div>Score: <span id="ttt-score">X 0 - 0 O</span></div>
                     </div>
                     <div id="tic-tac-toe-board">
@@ -956,7 +964,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 winCondition.forEach(index => this.cells[index].classList.add('winning-cell'));
                 if (winningPlayer === 'X') this.score.x++; else this.score.o++;
                 this.updateScoreDisplay();
-                setTimeout(() => this.startGame(), 2000); // Smooth restart
+                //setTimeout(() => this.startGame(), 2000); // Smooth restart
                 return true;
             }
 
@@ -965,7 +973,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.statusDisplay.textContent = this.statusMessages.draw;
                 this.statusDisplay.style.color = 'var(--font-color)';
                 this.gameActive = false;
-                setTimeout(() => this.startGame(), 2000); // Smooth restart
+                //setTimeout(() => this.startGame(), 2000); // Smooth restart
                 return true;
             }
             return false;
@@ -1054,6 +1062,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return this.winningConditions.some(c => c.every(i => board[i] === player));
         }
     };
+
+
     const RockPaperScissors = {
         statusDisplay: null, playerChoiceDisplay: null, computerChoiceDisplay: null, scoreDisplay: null,
         choices: ['rock', 'paper', 'scissors'], emojis: { rock: '✊', paper: '✋', scissors: '✌️' },
@@ -1081,14 +1091,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Set player choice immediately and start shaking
             this.playerChoiceDisplay.textContent = this.emojis[playerChoice];
-            this.computerChoiceDisplay.textContent = '摇'; // Shaking emoji placeholder
-            playerBox.classList.add('shaking');
+            this.computerChoiceDisplay.textContent = '✨'; // Shaking emoji placeholder
+            //playerBox.classList.add('shaking');
             computerBox.classList.add('shaking');
             this.statusDisplay.textContent = "Rock, Paper, Scissors, Shoot!";
 
             setTimeout(() => {
                 // Remove shaking animation
-                playerBox.classList.remove('shaking');
+                //playerBox.classList.remove('shaking');
                 computerBox.classList.remove('shaking');
                 
                 const computerChoice = this.choices[Math.floor(Math.random() * 3)];
@@ -1108,9 +1118,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.updateScoreDisplay();
                 // Re-enable buttons after result
                 document.querySelectorAll('.rps-btn').forEach(btn => btn.disabled = false);
-            }, 3000); // 3-second delay
+            }, 1000); // 1-second delay
         }
     };
+
+
     const MemoryGame = {
         board: null, statusDisplay: null, timerDisplay: null, clicksDisplay: null,
         cards: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🍎', '🍊', '🍓', '🍇', '🍉', '🍌', '🍍', '🥝', '🍕', '🍔', '🍟', '🍦', '🍩', '🍪', '🍬', '🍭'],
@@ -1204,8 +1216,9 @@ document.addEventListener('DOMContentLoaded', () => {
             this.statusDisplay.textContent = `Score: ${this.score}`; this.generateFood();
             this.draw();
             if (this.gameInterval) clearInterval(this.gameInterval);
-            this.gameInterval = setInterval(() => this.gameLoop(), 100);
+            this.gameInterval = setInterval(() => this.gameLoop(), 150);
             this.gameStarted = true;
+            this.nextDirection = this.direction;
         },
         drawInitialState() {
             this.ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--cell-bg').trim();
@@ -1215,11 +1228,20 @@ document.addEventListener('DOMContentLoaded', () => {
             this.ctx.fillRect(10 * this.gridSize, 10 * this.gridSize, this.gridSize - 2, this.gridSize - 2);
         },
         gameLoop() {
+            // Apply the nextDirection only once per tick
+             this.direction = this.nextDirection;
+
             let head = { ...this.snake[0] };
             if (this.direction === 'right') head.x++; if (this.direction === 'left') head.x--;
             if (this.direction === 'up') head.y--; if (this.direction === 'down') head.y++;
             if (head.x < 0 || head.x >= this.canvas.width / this.gridSize || head.y < 0 || head.y >= this.canvas.height / this.gridSize || this.snake.some(p => p.x === head.x && p.y === head.y)) {
-                this.startGame(); return;
+                //This.startGame(); return;
+                //This is my code
+                clearInterval(this.gameInterval);
+                this.gameInterval = null;
+                this.gameStarted = false;
+                this.statusDisplay.textContent = "Game Over — press an arrow key to restart";
+                return;
             }
             this.snake.unshift(head);
             if (head.x === this.food.x && head.y === this.food.y) {
@@ -1233,11 +1255,12 @@ document.addEventListener('DOMContentLoaded', () => {
             this.ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--x-color').trim();
             this.snake.forEach(part => { this.ctx.fillRect(part.x * this.gridSize, part.y * this.gridSize, this.gridSize - 2, this.gridSize - 2); });
             this.ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--o-color').trim();
-            this.ctx.fillRect(this.food.x * this.gridSize, this.food.y * this.gridSize, this.gridSize - 2, this.gridSize - 2);
+            this.ctx.fillRect(this.food.x * this.gridSize, this.food.y * this.gridSize, this.gridSize, this.gridSize);
         },
         generateFood() {
             this.food = { x: Math.floor(Math.random() * (this.canvas.width / this.gridSize)), y: Math.floor(Math.random() * (this.canvas.height / this.gridSize)) };
         },
+        
         changeDirection(e) {
             if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
             e.preventDefault(); // Prevent page scrolling
@@ -1245,74 +1268,139 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.startGame();
             }
             const key = e.key;
-            if (key === 'ArrowUp' && this.direction !== 'down') this.direction = 'up';
-            if (key === 'ArrowDown' && this.direction !== 'up') this.direction = 'down';
-            if (key === 'ArrowLeft' && this.direction !== 'right') this.direction = 'left';
-            if (key === 'ArrowRight' && this.direction !== 'left') this.direction = 'right';
+            if (key === 'ArrowUp' && this.direction !== 'down') this.nextDirection = 'up';
+            if (key === 'ArrowDown' && this.direction !== 'up') this.nextDirection = 'down';
+            if (key === 'ArrowLeft' && this.direction !== 'right') this.nextDirection = 'left';
+            if (key === 'ArrowRight' && this.direction !== 'left') this.nextDirection = 'right';
         }
     };
-    const Connect4 = {
-        ROWS: 6, COLS: 7, board: [], currentPlayer: 1, gameOver: false,
-        statusDisplay: null, boardEl: null,
-        init() {
-            this.statusDisplay = document.getElementById('connect4-status');
-            this.boardEl = document.getElementById('connect4-board');
-            document.getElementById('connect4-restart-btn').addEventListener('click', () => this.init());
-            this.startGame();
-        },
-        startGame() {
-            this.board = Array(this.ROWS).fill(null).map(() => Array(this.COLS).fill(0));
-            this.currentPlayer = 1; this.gameOver = false;
-            this.statusDisplay.textContent = "Player 1's Turn"; this.drawBoard();
-        },
-        drawBoard() {
-            this.boardEl.innerHTML = '';
-            for (let c = 0; c < this.COLS; c++) {
-                const colWrapper = document.createElement('div');
-                colWrapper.className = 'connect4-col'; colWrapper.dataset.col = c;
-                colWrapper.addEventListener('click', () => this.handleDrop(c));
-                for (let r = 0; r < this.ROWS; r++) {
-                    const cell = document.createElement('div'); cell.className = 'connect4-cell';
-                    if (this.board[r][c] === 1) cell.classList.add('p1');
-                    if (this.board[r][c] === 2) cell.classList.add('p2');
-                    colWrapper.appendChild(cell);
+            const Connect4 = {
+            ROWS: 6,
+            COLS: 7,
+            board: [],
+            currentPlayer: 1,
+            gameOver: false,
+            statusDisplay: null,
+            boardEl: null,
+            winningCells: [],
+            restartListenerAdded: false,
+
+            init() {
+                this.statusDisplay = document.getElementById('connect4-status');
+                this.boardEl = document.getElementById('connect4-board');
+
+                if (!this.restartListenerAdded) {
+                    document.getElementById('connect4-restart-btn')
+                        .addEventListener('click', () => this.startGame());
+                    this.restartListenerAdded = true;
                 }
-                this.boardEl.appendChild(colWrapper);
-            }
-        },
-        handleDrop(col) {
-            if (this.gameOver) return;
-            for (let r = this.ROWS - 1; r >= 0; r--) {
-                if (this.board[r][col] === 0) {
-                    this.board[r][col] = this.currentPlayer;
-                    if (this.checkWin(r, col)) {
-                        this.gameOver = true; this.statusDisplay.textContent = `Player ${this.currentPlayer} Wins!`;
-                    } else if (this.board.flat().every(cell => cell !== 0)) {
-                        this.gameOver = true; this.statusDisplay.textContent = "It's a Draw!";
-                    } else {
-                        this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
-                        this.statusDisplay.textContent = `Player ${this.currentPlayer}'s Turn`;
+
+                this.startGame();
+            },
+
+            startGame() {
+                this.board = Array(this.ROWS).fill(null).map(() => Array(this.COLS).fill(0));
+                this.currentPlayer = 1;
+                this.gameOver = false;
+                this.winningCells = [];
+                this.statusDisplay.textContent = "Player 1's Turn";
+                this.drawBoard();
+            },
+
+            drawBoard() {
+                this.boardEl.innerHTML = '';
+
+                // Columns as flex, rows top-to-bottom
+                for (let c = 0; c < this.COLS; c++) {
+                    const colWrapper = document.createElement('div');
+                    colWrapper.className = 'connect4-col';
+                    colWrapper.dataset.col = c;
+                    colWrapper.addEventListener('click', () => this.handleDrop(c));
+
+                    for (let r = 0; r < this.ROWS; r++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'connect4-cell';
+                        if (this.board[r][c] === 1) cell.classList.add('p1');
+                        if (this.board[r][c] === 2) cell.classList.add('p2');
+
+                        // Highlight winning pieces
+                        if (this.winningCells.some(([wr, wc]) => wr === r && wc === c)) {
+                            cell.classList.add('winner');
+                        }
+
+                        colWrapper.appendChild(cell);
                     }
-                    this.drawBoard(); return;
+
+                    this.boardEl.appendChild(colWrapper);
                 }
+            },
+
+            handleDrop(col) {
+                if (this.gameOver) return;
+
+                // Drop from bottom to top
+                for (let r = this.ROWS - 1; r >= 0; r--) {
+                    if (this.board[r][col] === 0) {
+                        this.board[r][col] = this.currentPlayer;
+
+                        const winningCells = this.checkWin(r, col);
+                        if (winningCells) {
+                            this.gameOver = true;
+                            this.statusDisplay.textContent = `Player ${this.currentPlayer} Wins!`;
+                            this.winningCells = winningCells;
+                        } else if (this.board.flat().every(cell => cell !== 0)) {
+                            this.gameOver = true;
+                            this.statusDisplay.textContent = "It's a Draw!";
+                            this.winningCells = [];
+                        } else {
+                            this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
+                            this.statusDisplay.textContent = `Player ${this.currentPlayer}'s Turn`;
+                            this.winningCells = [];
+                        }
+
+                        this.drawBoard();
+                        return;
+                    }
+                }
+            },
+
+           checkWin(r, c) {
+                const p = this.board[r][c];
+
+                const collect = (dr, dc) => {
+                    const cells = [];
+                    for (let i = 1; i < 4; i++) {
+                        const nr = r + i * dr;
+                        const nc = c + i * dc;
+                        if (nr >= 0 && nr < this.ROWS && nc >= 0 && nc < this.COLS && this.board[nr][nc] === p) {
+                            cells.push([nr, nc]);
+                        } else break;
+                    }
+                    return cells;
+                };
+
+                // Directions: horizontal, vertical, diag1, diag2
+                const directions = [
+                    [[0, 1], [0, -1]],       // horizontal
+                    [[1, 0], [-1, 0]],       // vertical
+                    [[1, 1], [-1, -1]],      // diagonal \
+                    [[1, -1], [-1, 1]]       // diagonal /
+                ];
+
+                for (const dir of directions) {
+                    const [first, second] = dir;
+                    const line = [[r, c], ...collect(...first), ...collect(...second)];
+
+                    if (line.length >= 4) {
+                        return line;
+                    }
+                }
+
+                return null;
             }
-        },
-        checkWin(r, c) {
-            const p = this.board[r][c];
-            const check = (dr, dc) => {
-                let count = 0;
-                for (let i = 1; i < 4; i++) {
-                    const nr = r + i * dr, nc = c + i * dc;
-                    if (nr >= 0 && nr < this.ROWS && nc >= 0 && nc < this.COLS && this.board[nr][nc] === p) count++; else break;
-                } return count;
-            };
-            if (check(0, 1) + check(0, -1) >= 3) return true;
-            if (check(1, 0) >= 3) return true;
-            if (check(1, 1) + check(-1, -1) >= 3) return true;
-            if (check(1, -1) + check(-1, 1) >= 3) return true;
-            return false;
-        }
-    };
+
+        };
+
     const Hangman = {
         words: [
             'APPLE', 'BAKER', 'CANDY', 'DREAM', 'EAGLE', 'FROST', 'GRAPE', 'HOUSE', 'IGLOO', 'JUICE',

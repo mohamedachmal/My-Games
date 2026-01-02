@@ -28,7 +28,7 @@
             font-family: 'Poppins', sans-serif;
             background-color: var(--bg-color);
             color: var(--font-color);
-            padding: 20px;
+            padding: 10px;
         }
 
         .game-arcade {
@@ -39,8 +39,78 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
             border: 2px solid var(--secondary-color);
             overflow: hidden;
+            position: relative;
         }
         
+        /* --- HOME UI STYLES START --- */
+        .arcade-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 20px;
+            background-color: var(--cell-bg);
+            position: relative;
+        }
+        .back-button {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--font-color);
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0 10px;
+        }
+        .arcade-logo {
+            color: var(--secondary-color);
+            font-size: 1.8rem;
+            text-shadow: 0 0 10px var(--secondary-color);
+        }
+        #home-view {
+            padding: 20px;
+        }
+        .game-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        .game-card {
+            background-color: var(--cell-bg);
+            padding: 25px 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid transparent;
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px var(--border-glow);
+            border-color: var(--secondary-color);
+        }
+        .game-card .emoji {
+            font-size: 1.5rem;
+            margin-left: 10px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        @media (min-width: 600px) {
+            .game-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (min-width: 768px) {
+            .game-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        /* --- HOME UI STYLES END --- */
+
         .game-tabs {
             display: flex;
             background-color: var(--cell-bg);
@@ -68,7 +138,7 @@
         }
 
         .game-area {
-            padding: 30px;
+            padding: 20px;
         }
 
         .game-wrapper {
@@ -346,43 +416,67 @@
             border-color: #777;
         }
 
+        /* --- Puzzle --- */
+        .puzzle-board {
+            display: grid;
+            grid-template-columns: repeat(3, 80px);
+            grid-template-rows: repeat(3, 80px);
+            gap: 5px;
+            margin: 20px auto 0;
+            width: fit-content;
+            background-color: var(--primary-color);
+            border: 5px solid var(--cell-bg);
+            border-radius: 10px;
+            padding: 5px;
+        }
+        .puzzle-tile {
+            width: 80px;
+            height: 80px;
+            background-color: var(--cell-bg);
+            color: var(--font-color);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .puzzle-tile:hover {
+            background-color: #2c3e50;
+        }
+        .puzzle-tile.empty {
+            background-color: transparent;
+            cursor: default;
+        }
+        .puzzle-board.win .puzzle-tile:not(.empty) {
+            background-color: var(--x-color);
+            animation: win-pulse 0.8s;
+        }
+
         /* --- Responsive Styles --- */
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-
-            .game-arcade {
-                border-radius: 0; /* No rounded corners on small screens */
-                border-left: none;
-                border-right: none;
-            }
-
             .game-area {
                 padding: 15px;
             }
-
             h1 {
                 font-size: 2rem;
                 margin-bottom: 15px;
             }
-
             .status-display {
                 font-size: 1rem;
             }
-
             .controls {
                 flex-direction: column;
                 gap: 10px;
             }
-
             .controls select, .controls button, .game-btn {
                 padding: 10px;
                 width: 100%;
                 max-width: 250px;
             }
-
-            /* Tic-Tac-Toe */
             #tic-tac-toe-board {
                 grid-template-columns: repeat(3, 80px);
                 gap: 5px;
@@ -396,8 +490,6 @@
                 max-width: 250px;
                 font-size: 0.9rem;
             }
-
-            /* Rock Paper Scissors */
             .rps-btn {
                 font-size: 2.5rem;
                 padding: 8px 15px;
@@ -412,8 +504,6 @@
                 width: 100%;
                 max-width: 200px;
             }
-
-            /* Memory Game */
             #memory-board {
                 grid-template-columns: repeat(4, 70px);
                 gap: 5px;
@@ -425,14 +515,10 @@
             .card-face {
                 font-size: 2rem;
             }
-
-            /* Snake */
             #snake-canvas {
                 width: 300px;
                 height: 300px;
             }
-
-            /* Connect 4 */
             #connect4-board {
                 grid-template-columns: repeat(7, 40px);
                 gap: 3px;
@@ -442,8 +528,6 @@
                 width: 40px;
                 height: 40px;
             }
-
-            /* Hangman */
             #hangman-word {
                 font-size: 1.5rem;
                 gap: 5px;
@@ -464,17 +548,12 @@
         }
 
         @media (max-width: 480px) {
-            h1 {
-                font-size: 1.8rem;
-            }
-            .tab-link {
-                padding: 10px 15px;
+            .arcade-logo {
+                font-size: 1.5rem;
             }
             .game-area {
                 padding: 10px;
             }
-
-            /* Tic-Tac-Toe */
             #tic-tac-toe-board {
                 grid-template-columns: repeat(3, 70px);
             }
@@ -483,14 +562,10 @@
                 height: 70px;
                 font-size: 2.5rem;
             }
-
-            /* Rock Paper Scissors */
             .rps-btn {
                 font-size: 2rem;
                 padding: 6px 10px;
             }
-
-            /* Memory Game */
             #memory-board {
                 grid-template-columns: repeat(4, 60px);
             }
@@ -501,14 +576,10 @@
             .card-face {
                 font-size: 1.5rem;
             }
-
-            /* Snake */
             #snake-canvas {
                 width: 250px;
                 height: 250px;
             }
-
-            /* Connect 4 */
             #connect4-board {
                 grid-template-columns: repeat(7, 35px);
             }
@@ -516,8 +587,6 @@
                 width: 35px;
                 height: 35px;
             }
-
-            /* Hangman */
             #hangman-drawing {
                 height: 150px;
             }
@@ -545,151 +614,205 @@
                 height: 30px;
                 font-size: 0.9rem;
             }
+            .puzzle-board {
+                grid-template-columns: repeat(3, 70px);
+                grid-template-rows: repeat(3, 70px);
+            }
+            .puzzle-tile {
+                width: 70px;
+                height: 70px;
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="game-arcade">
-    <nav class="game-tabs">
-        <a href="#" class="tab-link active" data-game="tic-tac-toe">Tic-Tac-Toe</a>
-        <a href="#" class="tab-link" data-game="rps">Rock Paper Scissors</a>
-        <a href="#" class="tab-link" data-game="memory">Memory Game</a>
-        <a href="#" class="tab-link" data-game="snake">Snake</a>
-        <a href="#" class="tab-link" data-game="connect4">Connect 4</a>
-        <a href="#" class="tab-link" data-game="hangman">Hangman</a>
-    </nav>
+    
+    <!-- HOME UI START -->
+    <header class="arcade-header">
+        <button id="back-button" class="back-button hidden">&larr;</button>
+        <h1 class="arcade-logo">Game Arcade</h1>
+    </header>
 
-    <main class="game-area">
-        <!-- Tic-Tac-Toe -->
-        <div id="tic-tac-toe" class="game-wrapper active">
-            <div class="game-container">
-                <h1>Tic-Tac-Toe</h1>
-                <div class="controls">
-                    <div class="control-group">
-                        <label for="ttt-game-mode">Game Mode</label>
-                        <select id="ttt-game-mode">
-                            <option value="single">Single Player</option>
-                            <option value="multiplayer">Multiplayer</option>
-                        </select>
-                    </div>
-                    <div class="control-group" id="ttt-difficulty-group">
-                        <label for="ttt-difficulty">Difficulty</label>
-                        <select id="ttt-difficulty">
-                            <option value="easy">Easy</option>
-                            <option value="medium">Medium</option>
-                            <option value="hard">Impossible</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="ttt-status" class="status-display">Choose a mode to start!</div>
-                <div id="ttt-player-info" class="player-info"></div>
-                <div id="ttt-extra-info" class="ttt-stats-container">
-                    <div>Time: <span id="ttt-timer">0s</span></div>
-                    <div>Score: <span id="ttt-score">X 0 - 0 O</span></div>
-                </div>
-                <div id="tic-tac-toe-board">
-                    <div class="ttt-cell" data-cell-index="0"></div>
-                    <div class="ttt-cell" data-cell-index="1"></div>
-                    <div class="ttt-cell" data-cell-index="2"></div>
-                    <div class="ttt-cell" data-cell-index="3"></div>
-                    <div class="ttt-cell" data-cell-index="4"></div>
-                    <div class="ttt-cell" data-cell-index="5"></div>
-                    <div class="ttt-cell" data-cell-index="6"></div>
-                    <div class="ttt-cell" data-cell-index="7"></div>
-                    <div class="ttt-cell" data-cell-index="8"></div>
-                </div>
-                <button id="ttt-restart-btn" class="game-btn">Restart Game</button>
+    <div id="home-view">
+        <div class="game-grid">
+            <div class="game-card" data-game="tic-tac-toe">
+                Tic-Tac-Toe <span class="emoji">✏️</span>
+            </div>
+            <div class="game-card" data-game="rps">
+                Rock Paper Scissors <span class="emoji">✊</span>
+            </div>
+            <div class="game-card" data-game="memory">
+                Memory Game <span class="emoji">🧠</span>
+            </div>
+            <div class="game-card" data-game="snake">
+                Snake <span class="emoji">🐍</span>
+            </div>
+            <div class="game-card" data-game="connect4">
+                Connect 4 <span class="emoji">🔵</span>
+            </div>
+            <div class="game-card" data-game="hangman">
+                Hangman <span class="emoji">🤔</span>
+            </div>
+             <div class="game-card" data-game="puzzle">
+                Sliding Puzzle <span class="emoji">🧩</span>
             </div>
         </div>
+    </div>
+    <!-- HOME UI END -->
 
-        <!-- Rock Paper Scissors -->
-        <div id="rps" class="game-wrapper">
-             <div class="game-container">
-                <h1>Rock Paper Scissors</h1>
-                <div id="rps-score" class="status-display">Player 0 - 0 Computer</div>
-                <div id="rps-status" class="status-display">Make your choice!</div>
-                <div id="rps-choices">
-                    <button class="rps-btn" data-choice="rock">✊</button>
-                    <button class="rps-btn" data-choice="paper">✋</button>
-                    <button class="rps-btn" data-choice="scissors">✌️</button>
-                </div>
-                <div id="rps-results">
-                    <div class="rps-result-box">
-                        <h3>You</h3>
-                        <p id="rps-player-choice">?</p>
-                    </div>
-                     <div class="rps-result-box">
-                        <h3>Computer</h3>
-                        <p id="rps-computer-choice">?</p>
-                    </div>
-                </div>
-             </div>
-        </div>
-        
-        <!-- Memory Game -->
-        <div id="memory" class="game-wrapper">
-            <div class="game-container">
-                <h1>Memory Game</h1>
-                <div class="ttt-stats-container">
-                    <div>Time: <span id="memory-timer">0s</span></div>
-                    <div>Clicks: <span id="memory-clicks">0</span></div>
-                </div>
-                <div id="memory-status" class="status-display">Match the pairs!</div>
-                <div id="memory-board"></div>
-                <button id="memory-restart-btn" class="game-btn">Restart Game</button>
-            </div>
-        </div>
-        
-        <!-- Snake -->
-        <div id="snake" class="game-wrapper">
-             <div class="game-container">
-                <h1>Snake</h1>
-                <div id="snake-status" class="status-display">Score: 0</div>
-                <canvas id="snake-canvas" width="400" height="400"></canvas>
-                <p style="margin-top: 10px;">Use Arrow Keys to move</p>
-            </div>
-        </div>
-        
-        <!-- Connect 4 -->
-        <div id="connect4" class="game-wrapper">
-            <div class="game-container">
-                <h1>Connect 4</h1>
-                <div id="connect4-instructions" style="margin-bottom: 20px; line-height: 1.5;">
-                    <p>Connect Four is a two-player connection game in which the players first choose a color and then take turns dropping colored discs from the top into a seven-column, six-row vertically suspended grid.</p>
-                    <p>The objective is to be the first to form a horizontal, vertical, or diagonal line of four of one's own discs.</p>
-                    <p>Player 1: <span style="color: var(--x-color); font-weight: bold;">🔴 Red</span></p>
-                    <p>Player 2: <span style="color: var(--o-color); font-weight: bold;">🟡 Yellow</span></p>
-                </div>
-                <div id="connect4-status" class="status-display">Player 1's Turn</div>
-                <div id="connect4-board"></div>
-                <button id="connect4-restart-btn" class="game-btn">Restart Game</button>
-            </div>
-        </div>
-        
-        <!-- Hangman -->
-        <div id="hangman" class="game-wrapper">
-            <div class="game-container">
-                <h1>Hangman</h1>
-                <div id="hangman-status" class="status-display">Guess the word!</div>
-                <div id="hangman-drawing">
-                    <div class="hangman-part" id="hangman-scaffold-1"></div>
-                    <div class="hangman-part" id="hangman-scaffold-2"></div>
-                    <div class="hangman-part" id="hangman-scaffold-3"></div>
-                    <div class="hangman-part" id="hangman-head"></div>
-                    <div class="hangman-part" id="hangman-body"></div>
-                    <div class="hangman-part" id="hangman-arm-l"></div>
-                    <div class="hangman-part" id="hangman-arm-r"></div>
-                    <div class="hangman-part" id="hangman-leg-l"></div>
-                    <div class="hangman-part" id="hangman-leg-r"></div>
-                </div>
-                <div id="hangman-word"></div>
-                <div id="hangman-keys"></div>
-                <button id="hangman-restart-btn" class="game-btn">New Word</button>
-            </div>
-        </div>
+    <div id="game-view" class="hidden">
+        <nav class="game-tabs" style="display: none;">
+            <a href="#" class="tab-link active" data-game="tic-tac-toe">Tic-Tac-Toe</a>
+            <a href="#" class="tab-link" data-game="rps">Rock Paper Scissors</a>
+            <a href="#" class="tab-link" data-game="memory">Memory Game</a>
+            <a href="#" class="tab-link" data-game="snake">Snake</a>
+            <a href="#" class="tab-link" data-game="connect4">Connect 4</a>
+            <a href="#" class="tab-link" data-game="hangman">Hangman</a>
+            <a href="#" class="tab-link" data-game="puzzle">Puzzle</a>
+        </nav>
 
-    </main>
+        <main class="game-area">
+            <!-- Tic-Tac-Toe -->
+            <div id="tic-tac-toe" class="game-wrapper">
+                <div class="game-container">
+                    <h1>Tic-Tac-Toe</h1>
+                    <div class="controls">
+                        <div class="control-group">
+                            <label for="ttt-game-mode">Game Mode</label>
+                            <select id="ttt-game-mode">
+                                <option value="single">Single Player</option>
+                                <option value="multiplayer">Multiplayer</option>
+                            </select>
+                        </div>
+                        <div class="control-group" id="ttt-difficulty-group">
+                            <label for="ttt-difficulty">Difficulty</label>
+                            <select id="ttt-difficulty">
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Impossible</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="ttt-status" class="status-display">Choose a mode to start!</div>
+                    <div id="ttt-player-info" class="player-info"></div>
+                    <div id="ttt-extra-info" class="ttt-stats-container">
+                        <div>Time: <span id="ttt-timer">0s</span></div>
+                        <div>Score: <span id="ttt-score">X 0 - 0 O</span></div>
+                    </div>
+                    <div id="tic-tac-toe-board">
+                        <div class="ttt-cell" data-cell-index="0"></div>
+                        <div class="ttt-cell" data-cell-index="1"></div>
+                        <div class="ttt-cell" data-cell-index="2"></div>
+                        <div class="ttt-cell" data-cell-index="3"></div>
+                        <div class="ttt-cell" data-cell-index="4"></div>
+                        <div class="ttt-cell" data-cell-index="5"></div>
+                        <div class="ttt-cell" data-cell-index="6"></div>
+                        <div class="ttt-cell" data-cell-index="7"></div>
+                        <div class="ttt-cell" data-cell-index="8"></div>
+                    </div>
+                    <button id="ttt-restart-btn" class="game-btn">Restart Game</button>
+                </div>
+            </div>
+
+            <!-- Rock Paper Scissors -->
+            <div id="rps" class="game-wrapper">
+                 <div class="game-container">
+                    <h1>Rock Paper Scissors</h1>
+                    <div id="rps-score" class="status-display">Player 0 - 0 Computer</div>
+                    <div id="rps-status" class="status-display">Make your choice!</div>
+                    <div id="rps-choices">
+                        <button class="rps-btn" data-choice="rock">✊</button>
+                        <button class="rps-btn" data-choice="paper">✋</button>
+                        <button class="rps-btn" data-choice="scissors">✌️</button>
+                    </div>
+                    <div id="rps-results">
+                        <div class="rps-result-box">
+                            <h3>You</h3>
+                            <p id="rps-player-choice">?</p>
+                        </div>
+                         <div class="rps-result-box">
+                            <h3>Computer</h3>
+                            <p id="rps-computer-choice">?</p>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+            
+            <!-- Memory Game -->
+            <div id="memory" class="game-wrapper">
+                <div class="game-container">
+                    <h1>Memory Game</h1>
+                    <div class="ttt-stats-container">
+                        <div>Time: <span id="memory-timer">0s</span></div>
+                        <div>Clicks: <span id="memory-clicks">0</span></div>
+                    </div>
+                    <div id="memory-status" class="status-display">Match the pairs!</div>
+                    <div id="memory-board"></div>
+                    <button id="memory-restart-btn" class="game-btn">Restart Game</button>
+                </div>
+            </div>
+            
+            <!-- Snake -->
+            <div id="snake" class="game-wrapper">
+                 <div class="game-container">
+                    <h1>Snake</h1>
+                    <div id="snake-status" class="status-display">Score: 0</div>
+                    <canvas id="snake-canvas" width="400" height="400"></canvas>
+                    <p style="margin-top: 10px;">Use Arrow Keys to move</p>
+                </div>
+            </div>
+            
+            <!-- Connect 4 -->
+            <div id="connect4" class="game-wrapper">
+                <div class="game-container">
+                    <h1>Connect 4</h1>
+                    <div id="connect4-instructions" style="margin-bottom: 20px; line-height: 1.5;">
+                        <p>Player 1: <span style="color: var(--x-color); font-weight: bold;">🔴 Red</span></p>
+                        <p>Player 2: <span style="color: var(--o-color); font-weight: bold;">🟡 Yellow</span></p>
+                    </div>
+                    <div id="connect4-status" class="status-display">Player 1's Turn</div>
+                    <div id="connect4-board"></div>
+                    <button id="connect4-restart-btn" class="game-btn">Restart Game</button>
+                </div>
+            </div>
+            
+            <!-- Hangman -->
+            <div id="hangman" class="game-wrapper">
+                <div class="game-container">
+                    <h1>Hangman</h1>
+                    <div id="hangman-status" class="status-display">Guess the word!</div>
+                    <div id="hangman-drawing">
+                        <div class="hangman-part" id="hangman-scaffold-1"></div>
+                        <div class="hangman-part" id="hangman-scaffold-2"></div>
+                        <div class="hangman-part" id="hangman-scaffold-3"></div>
+                        <div class="hangman-part" id="hangman-head"></div>
+                        <div class="hangman-part" id="hangman-body"></div>
+                        <div class="hangman-part" id="hangman-arm-l"></div>
+                        <div class="hangman-part" id="hangman-arm-r"></div>
+                        <div class="hangman-part" id="hangman-leg-l"></div>
+                        <div class="hangman-part" id="hangman-leg-r"></div>
+                    </div>
+                    <div id="hangman-word"></div>
+                    <div id="hangman-keys"></div>
+                    <button id="hangman-restart-btn" class="game-btn">New Word</button>
+                </div>
+            </div>
+            
+            <!-- Puzzle -->
+            <div id="puzzle" class="game-wrapper">
+                <div class="game-container">
+                    <h1>Sliding Puzzle</h1>
+                    <div id="puzzle-status" class="status-display">Shuffle to start!</div>
+                    <div id="puzzle-board" class="puzzle-board"></div>
+                    <button id="puzzle-restart-btn" class="game-btn" style="margin-top: 20px;">Shuffle</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
 </div>
 
 <script>
@@ -1253,11 +1376,108 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
+    const Puzzle = {
+        boardEl: null,
+        statusDisplay: null,
+        restartBtn: null,
+        tiles: [],
+        gameOver: false,
 
-    // --- Main Control Logic ---
+        init() {
+            this.boardEl = document.getElementById('puzzle-board');
+            this.statusDisplay = document.getElementById('puzzle-status');
+            this.restartBtn = document.getElementById('puzzle-restart-btn');
+            this.restartBtn.addEventListener('click', () => this.startGame());
+            this.startGame();
+        },
+
+        startGame() {
+            this.gameOver = false;
+            this.statusDisplay.textContent = 'Solve the puzzle!';
+            this.boardEl.classList.remove('win');
+            this.tiles = [1, 2, 3, 4, 5, 6, 7, 8, 0]; // 0 represents the empty tile
+            this.shuffle();
+            this.drawBoard();
+        },
+
+        drawBoard() {
+            this.boardEl.innerHTML = '';
+            this.tiles.forEach((num, index) => {
+                const tile = document.createElement('div');
+                tile.className = 'puzzle-tile';
+                if (num === 0) {
+                    tile.classList.add('empty');
+                } else {
+                    tile.textContent = num;
+                    tile.addEventListener('click', () => this.handleTileClick(index));
+                }
+                this.boardEl.appendChild(tile);
+            });
+            this.checkWin();
+        },
+
+        shuffle() {
+            // Perform a large number of random valid moves to shuffle
+            let emptyIndex = this.tiles.indexOf(0);
+            for (let i = 0; i < 500; i++) {
+                const neighbors = this.getNeighbors(emptyIndex);
+                const randomNeighborIndex = neighbors[Math.floor(Math.random() * neighbors.length)];
+                this.swapTiles(emptyIndex, randomNeighborIndex);
+                emptyIndex = randomNeighborIndex;
+            }
+            // Ensure it's not solved after shuffling
+            if (this.isSolved()) {
+                this.shuffle();
+            }
+        },
+        
+        getNeighbors(index) {
+            const neighbors = [];
+            const row = Math.floor(index / 3);
+            const col = index % 3;
+            if (row > 0) neighbors.push(index - 3); // Up
+            if (row < 2) neighbors.push(index + 3); // Down
+            if (col > 0) neighbors.push(index - 1); // Left
+            if (col < 2) neighbors.push(index + 1); // Right
+            return neighbors;
+        },
+
+        handleTileClick(index) {
+            if (this.gameOver) return;
+
+            const emptyIndex = this.tiles.indexOf(0);
+            const neighbors = this.getNeighbors(emptyIndex);
+            
+            if (neighbors.includes(index)) {
+                this.swapTiles(index, emptyIndex);
+                this.drawBoard();
+            }
+        },
+
+        swapTiles(index1, index2) {
+            [this.tiles[index1], this.tiles[index2]] = [this.tiles[index2], this.tiles[index1]];
+        },
+
+        isSolved() {
+            for(let i = 0; i < this.tiles.length - 1; i++) {
+                if (this.tiles[i] !== i + 1) return false;
+            }
+            return this.tiles[this.tiles.length - 1] === 0;
+        },
+
+        checkWin() {
+            if (this.isSolved()) {
+                this.gameOver = true;
+                this.statusDisplay.textContent = 'You Win!';
+                this.boardEl.classList.add('win');
+            }
+        }
+    };
+
+    // --- Original Main Control Logic ---
     const tabLinks = document.querySelectorAll('.tab-link');
     const gameWrappers = document.querySelectorAll('.game-wrapper');
-    let activeGame = 'tic-tac-toe';
+    let activeGame = null;
     let gameInterval = null;
 
     const gameInits = {
@@ -1267,30 +1487,56 @@ document.addEventListener('DOMContentLoaded', () => {
         'snake': Snake.init.bind(Snake),
         'connect4': Connect4.init.bind(Connect4),
         'hangman': Hangman.init.bind(Hangman),
+        'puzzle': Puzzle.init.bind(Puzzle),
     };
 
-    tabLinks.forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            e.preventDefault();
-            const gameId = e.target.dataset.game;
-            if (gameId === activeGame) return;
-            
-            // Stop listeners/intervals from the old game
-            if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
+    function switchGame(gameId) {
+        if (gameId === activeGame && document.getElementById(gameId).classList.contains('active')) return;
+        
+        // Stop listeners/intervals from the old game
+        if (activeGame) {
+             if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
             if (activeGame === 'snake') Snake.stop();
             if (activeGame === 'tic-tac-toe') TicTacToe.stop();
+        }
+        
+        activeGame = gameId;
+        tabLinks.forEach(link => link.classList.toggle('active', link.dataset.game === gameId));
+        gameWrappers.forEach(wrapper => {
+            wrapper.classList.toggle('active', wrapper.id === gameId);
+        });
+        if (gameInits[gameId]) gameInits[gameId]();
+    }
+    
+    // --- HOME UI VISIBILITY TOGGLING START ---
+    const homeView = document.getElementById('home-view');
+    const gameView = document.getElementById('game-view');
+    const backButton = document.getElementById('back-button');
+    const gameCards = document.querySelectorAll('.game-card');
+
+    gameCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const gameId = card.dataset.game;
             
-            activeGame = gameId;
-            tabLinks.forEach(link => link.classList.remove('active'));
-            e.target.classList.add('active');
-            gameWrappers.forEach(wrapper => {
-                wrapper.classList.toggle('active', wrapper.id === gameId);
-            });
-            if (gameInits[gameId]) gameInits[gameId]();
+            // Use the existing game switching logic
+            switchGame(gameId);
+
+            // Toggle views
+            homeView.classList.add('hidden');
+            gameView.classList.remove('hidden');
+            backButton.classList.remove('hidden');
         });
     });
 
-    gameInits[activeGame]();
+    backButton.addEventListener('click', () => {
+        homeView.classList.remove('hidden');
+        gameView.classList.add('hidden');
+        backButton.classList.add('hidden');
+    });
+
+    // On initial load, don't auto-start a game
+    gameWrappers.forEach(wrapper => wrapper.classList.remove('active'));
+    // --- HOME UI VISIBILITY TOGGLING END ---
 });
 </script>
 

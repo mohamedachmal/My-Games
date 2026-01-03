@@ -777,9 +777,27 @@
             <div id="connect4" class="game-wrapper">
                 <div class="game-container">
                     <h1>Connect 4</h1>
+                    <div class="controls">
+                        <div class="control-group">
+                            <label for="c4-game-mode">Game Mode</label>
+                            <select id="c4-game-mode">
+                                <option value="single">Single Player</option>
+                                <option value="multiplayer" selected>Multiplayer</option>
+                            </select>
+                        </div>
+                        <div class="control-group" id="c4-difficulty-group" style="display: none;">
+                            <label for="c4-difficulty">Difficulty</label>
+                            <select id="c4-difficulty">
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Impossible</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="connect4-score" class="status-display">P1 0 - 0 P2</div>
                     <div id="connect4-instructions" style="margin-bottom: 20px; line-height: 1.5;">
-                        <p>Player 1: <span style="color: var(--x-color); font-weight: bold;">🔴 Red</span></p>
-                        <p>Player 2: <span style="color: var(--o-color); font-weight: bold;">🟡 Yellow</span></p>
+                        <p>Player 1: <span style="color: var(--x-color); font-weight: bold;"> 🔵 </span></p>
+                        <p>Player 2: <span style="color: var(--o-color); font-weight: bold;"> 🔴</span></p>
                     </div>
                     <div id="connect4-status" class="status-display">Player 1's Turn</div>
                     <div id="connect4-board"></div>
@@ -1280,18 +1298,32 @@ document.addEventListener('DOMContentLoaded', () => {
             board: [],
             currentPlayer: 1,
             gameOver: false,
+            gameMode: 'multiplayer',
+            difficulty: 'hard',
+            score: { p1: 0, p2: 0 },
+            humanPlayer: 1,
+            aiPlayer: 2,
             statusDisplay: null,
             boardEl: null,
             winningCells: [],
             restartListenerAdded: false,
+            gameModeSelect: null,
+            difficultySelect: null,
+            difficultyGroup: null,
+            scoreDisplay: null,
 
             init() {
                 this.statusDisplay = document.getElementById('connect4-status');
                 this.boardEl = document.getElementById('connect4-board');
+                this.gameModeSelect = document.getElementById('c4-game-mode');
+                this.difficultySelect = document.getElementById('c4-difficulty');
+                this.difficultyGroup = document.getElementById('c4-difficulty-group');
+                this.scoreDisplay = document.getElementById('connect4-score');
 
                 if (!this.restartListenerAdded) {
-                    document.getElementById('connect4-restart-btn')
-                        .addEventListener('click', () => this.startGame());
+                    document.getElementById('connect4-restart-btn').addEventListener('click', () => this.startGame());
+                    this.gameModeSelect.addEventListener('change', () => { this.score.p1 = 0; this.score.p2 = 0; this.startGame(); });
+                    this.difficultySelect.addEventListener('change', () => { this.score.p1 = 0; this.score.p2 = 0; this.startGame(); });
                     this.restartListenerAdded = true;
                 }
 
@@ -1299,106 +1331,323 @@ document.addEventListener('DOMContentLoaded', () => {
             },
 
             startGame() {
+                this.gameMode = this.gameModeSelect.value;
+                this.difficulty = this.difficultySelect.value;
+                this.difficultyGroup.style.display = this.gameMode === 'single' ? 'flex' : 'none';
+
                 this.board = Array(this.ROWS).fill(null).map(() => Array(this.COLS).fill(0));
                 this.currentPlayer = 1;
                 this.gameOver = false;
                 this.winningCells = [];
-                this.statusDisplay.textContent = "Player 1's Turn";
+                this.updateScoreDisplay();
+
+                if (this.gameMode === 'single') {
+                    this.statusDisplay.textContent = "Your Turn";
+                    if (this.currentPlayer === this.aiPlayer) {
+                        this.statusDisplay.textContent = "Robot is thinking...";
+                        setTimeout(() => this.robotMove(), 700);
+                    }
+                } else {
+                    this.statusDisplay.textContent = "Player 1's Turn";
+                }
                 this.drawBoard();
+            },
+
+            updateScoreDisplay() {
+                const p1Label = this.gameMode === 'single' ? 'You' : 'P1';
+                const p2Label = this.gameMode === 'single' ? 'AI' : 'P2';
+                this.scoreDisplay.textContent = `${p1Label} ${this.score.p1} - ${this.score.p2} ${p2Label}`;
             },
 
             drawBoard() {
                 this.boardEl.innerHTML = '';
-
-                // Columns as flex, rows top-to-bottom
                 for (let c = 0; c < this.COLS; c++) {
                     const colWrapper = document.createElement('div');
                     colWrapper.className = 'connect4-col';
                     colWrapper.dataset.col = c;
                     colWrapper.addEventListener('click', () => this.handleDrop(c));
-
                     for (let r = 0; r < this.ROWS; r++) {
                         const cell = document.createElement('div');
                         cell.className = 'connect4-cell';
                         if (this.board[r][c] === 1) cell.classList.add('p1');
                         if (this.board[r][c] === 2) cell.classList.add('p2');
-
-                        // Highlight winning pieces
                         if (this.winningCells.some(([wr, wc]) => wr === r && wc === c)) {
                             cell.classList.add('winner');
                         }
-
                         colWrapper.appendChild(cell);
                     }
-
                     this.boardEl.appendChild(colWrapper);
                 }
             },
 
             handleDrop(col) {
-                if (this.gameOver) return;
+                if (this.gameOver || (this.gameMode === 'single' && this.currentPlayer === this.aiPlayer)) return;
 
-                // Drop from bottom to top
-                for (let r = this.ROWS - 1; r >= 0; r--) {
-                    if (this.board[r][col] === 0) {
-                        this.board[r][col] = this.currentPlayer;
-
-                        const winningCells = this.checkWin(r, col);
-                        if (winningCells) {
-                            this.gameOver = true;
-                            this.statusDisplay.textContent = `Player ${this.currentPlayer} Wins!`;
-                            this.winningCells = winningCells;
-                        } else if (this.board.flat().every(cell => cell !== 0)) {
-                            this.gameOver = true;
-                            this.statusDisplay.textContent = "It's a Draw!";
-                            this.winningCells = [];
+                if(this.makeMove(col, this.currentPlayer)) {
+                    if (!this.gameOver) {
+                         if (this.gameMode === 'single') {
+                            this.currentPlayer = this.aiPlayer;
+                            this.statusDisplay.textContent = "Robot is thinking...";
+                            setTimeout(() => this.robotMove(), 500);
                         } else {
                             this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
                             this.statusDisplay.textContent = `Player ${this.currentPlayer}'s Turn`;
-                            this.winningCells = [];
                         }
-
-                        this.drawBoard();
-                        return;
                     }
                 }
             },
 
-           checkWin(r, c) {
-                const p = this.board[r][c];
+            makeMove(col, player) {
+                 if (this.board[0][col] !== 0) return false;
 
-                const collect = (dr, dc) => {
-                    const cells = [];
-                    for (let i = 1; i < 4; i++) {
-                        const nr = r + i * dr;
-                        const nc = c + i * dc;
-                        if (nr >= 0 && nr < this.ROWS && nc >= 0 && nc < this.COLS && this.board[nr][nc] === p) {
-                            cells.push([nr, nc]);
-                        } else break;
-                    }
-                    return cells;
-                };
-
-                // Directions: horizontal, vertical, diag1, diag2
-                const directions = [
-                    [[0, 1], [0, -1]],       // horizontal
-                    [[1, 0], [-1, 0]],       // vertical
-                    [[1, 1], [-1, -1]],      // diagonal \
-                    [[1, -1], [-1, 1]]       // diagonal /
-                ];
-
-                for (const dir of directions) {
-                    const [first, second] = dir;
-                    const line = [[r, c], ...collect(...first), ...collect(...second)];
-
-                    if (line.length >= 4) {
-                        return line;
+                let r;
+                for (r = this.ROWS - 1; r >= 0; r--) {
+                    if (this.board[r][col] === 0) {
+                        this.board[r][col] = player;
+                        break;
                     }
                 }
 
-                return null;
-            }
+                const winningCells = this.checkWin(this.board, player);
+                if (winningCells) {
+                    this.gameOver = true;
+                    if (player === 1) this.score.p1++; else this.score.p2++;
+                    this.statusDisplay.textContent = this.gameMode === 'single' ? (player === this.humanPlayer ? "You Win!" : "Robot Wins!") : `Player ${player} Wins!`;
+                    this.winningCells = winningCells;
+                    this.updateScoreDisplay();
+                } else if (this.board.flat().every(cell => cell !== 0)) {
+                    this.gameOver = true;
+                    this.statusDisplay.textContent = "It's a Draw!";
+                }
+                
+                this.drawBoard();
+                return true;
+            },
 
+           checkWin(board, player) {
+                // Check horizontal
+                for (let r = 0; r < this.ROWS; r++) {
+                    for (let c = 0; c <= this.COLS - 4; c++) {
+                        if (board[r][c] === player && board[r][c+1] === player && board[r][c+2] === player && board[r][c+3] === player) {
+                            return [[r,c], [r,c+1], [r,c+2], [r,c+3]];
+                        }
+                    }
+                }
+                // Check vertical
+                for (let r = 0; r <= this.ROWS - 4; r++) {
+                    for (let c = 0; c < this.COLS; c++) {
+                        if (board[r][c] === player && board[r+1][c] === player && board[r+2][c] === player && board[r+3][c] === player) {
+                           return [[r,c], [r+1,c], [r+2,c], [r+3,c]];
+                        }
+                    }
+                }
+                // Check diagonal \
+                for (let r = 0; r <= this.ROWS - 4; r++) {
+                    for (let c = 0; c <= this.COLS - 4; c++) {
+                        if (board[r][c] === player && board[r+1][c+1] === player && board[r+2][c+2] === player && board[r+3][c+3] === player) {
+                            return [[r,c], [r+1,c+1], [r+2,c+2], [r+3,c+3]];
+                        }
+                    }
+                }
+                // Check diagonal /
+                for (let r = 3; r < this.ROWS; r++) {
+                    for (let c = 0; c <= this.COLS - 4; c++) {
+                        if (board[r][c] === player && board[r-1][c+1] === player && board[r-2][c+2] === player && board[r-3][c+3] === player) {
+                            return [[r,c], [r-1,c+1], [r-2,c+2], [r-3,c+3]];
+                        }
+                    }
+                }
+                return null;
+            },
+
+            robotMove() {
+                if (this.gameOver) return;
+                let move;
+                let startTime = performance.now();
+                if (this.difficulty === 'easy') {
+                    move = this.getEasyMove();
+                } else if (this.difficulty === 'medium') {
+                    move = this.getMediumMove();
+                } else { // hard
+                    move = this.getHardMove();
+                }
+                let endTime = performance.now();
+                console.log(`AI move took ${endTime - startTime}ms`);
+
+
+                if (move !== undefined) {
+                    this.makeMove(move, this.aiPlayer);
+                }
+
+                if (!this.gameOver) {
+                    this.currentPlayer = this.humanPlayer;
+                    this.statusDisplay.textContent = "Your Turn";
+                }
+            },
+
+            getAvailableMoves(board = this.board) {
+                const moves = [];
+                for (let c = 0; c < this.COLS; c++) {
+                    if (board[0][c] === 0) {
+                        moves.push(c);
+                    }
+                }
+                return moves;
+            },
+
+            getEasyMove() {
+                const moves = this.getAvailableMoves();
+                return moves[Math.floor(Math.random() * moves.length)];
+            },
+
+            getMediumMove() {
+                const availableMoves = this.getAvailableMoves();
+                // AI checks if it can win
+                for (const move of availableMoves) {
+                    if (this.isWinningMove(move, this.aiPlayer, this.board)) return move;
+                }
+                // AI checks if it needs to block
+                for (const move of availableMoves) {
+                     if (this.isWinningMove(move, this.humanPlayer, this.board)) return move;
+                }
+                // Prioritize center
+                const centerMoves = [3, 2, 4, 1, 5, 0, 6];
+                for(const move of centerMoves) {
+                    if(availableMoves.includes(move)) return move;
+                }
+                return this.getEasyMove(); // Fallback
+            },
+            
+            isWinningMove(col, player, board) {
+                let tempBoard = board.map(row => [...row]);
+                let r;
+                for (r = this.ROWS - 1; r >= 0; r--) {
+                    if (tempBoard[r][col] === 0) {
+                        tempBoard[r][col] = player;
+                        break;
+                    }
+                }
+                if (r < 0) return false; // Column was full
+                const win = this.checkWin(tempBoard, player) !== null;
+                return win;
+            },
+
+            getHardMove() {
+                // The depth can be adjusted. 5 is a decent balance of strength and speed.
+                const result = this.minimax(this.board, 5, -Infinity, Infinity, true);
+                console.log("Minimax analysis:", result);
+                return result.col;
+            },
+
+            minimax(board, depth, alpha, beta, isMaximizing) {
+                const isTerminal = this.isTerminalNode(board);
+                if (depth === 0 || isTerminal.result) {
+                    return { col: null, score: this.evaluateBoard(board, this.aiPlayer) - this.evaluateBoard(board, this.humanPlayer) };
+                }
+                
+                const availableMoves = this.getAvailableMoves(board);
+                let bestCol = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+
+                if (isMaximizing) {
+                    let bestScore = -Infinity;
+                    for (const col of availableMoves) {
+                        let tempBoard = board.map(row => [...row]);
+                        this.dropPiece(tempBoard, col, this.aiPlayer);
+                        let newScore = this.minimax(tempBoard, depth - 1, alpha, beta, false).score;
+                        if (newScore > bestScore) {
+                            bestScore = newScore;
+                            bestCol = col;
+                        }
+                        alpha = Math.max(alpha, bestScore);
+                        if (alpha >= beta) break;
+                    }
+                    return { col: bestCol, score: bestScore };
+                } else { // Minimizing player
+                    let bestScore = Infinity;
+                    for (const col of availableMoves) {
+                         let tempBoard = board.map(row => [...row]);
+                         this.dropPiece(tempBoard, col, this.humanPlayer);
+                         let newScore = this.minimax(tempBoard, depth - 1, alpha, beta, true).score;
+                         if (newScore < bestScore) {
+                             bestScore = newScore;
+                             bestCol = col;
+                         }
+                         beta = Math.min(beta, bestScore);
+                         if (alpha >= beta) break;
+                    }
+                    return { col: bestCol, score: bestScore };
+                }
+            },
+            
+            isTerminalNode(board) {
+                if (this.checkWin(board, this.humanPlayer)) return { result: true, winner: this.humanPlayer};
+                if (this.checkWin(board, this.aiPlayer)) return { result: true, winner: this.aiPlayer};
+                if (board.flat().every(cell => cell !== 0)) return { result: true, winner: null}; // Draw
+                return { result: false };
+            },
+            
+            dropPiece(board, col, player) {
+                for(let r = this.ROWS - 1; r >= 0; r--) {
+                    if (board[r][col] === 0) {
+                        board[r][col] = player;
+                        return r;
+                    }
+                }
+                return -1;
+            },
+
+            evaluateBoard(board, player) {
+                let score = 0;
+                // Score center column
+                const centerCol = board.map(row => row[Math.floor(this.COLS / 2)]);
+                score += centerCol.filter(p => p === player).length * 3;
+
+                // Score Horizontal
+                for (let r = 0; r < this.ROWS; r++) {
+                    for (let c = 0; c <= this.COLS - 4; c++) {
+                        const window = board[r].slice(c, c + 4);
+                        score += this.evaluateWindow(window, player);
+                    }
+                }
+                // Score Vertical
+                for (let c = 0; c < this.COLS; c++) {
+                    for (let r = 0; r <= this.ROWS - 4; r++) {
+                        const window = [board[r][c], board[r+1][c], board[r+2][c], board[r+3][c]];
+                        score += this.evaluateWindow(window, player);
+                    }
+                }
+                // Score Diagonal /
+                for (let r = 3; r < this.ROWS; r++) {
+                    for (let c = 0; c <= this.COLS - 4; c++) {
+                        const window = [board[r][c], board[r-1][c+1], board[r-2][c+2], board[r-3][c+3]];
+                         score += this.evaluateWindow(window, player);
+                    }
+                }
+                 // Score Diagonal \
+                for (let r = 0; r <= this.ROWS - 4; r++) {
+                    for (let c = 0; c <= this.COLS - 4; c++) {
+                        const window = [board[r][c], board[r+1][c+1], board[r+2][c+2], board[r+3][c+3]];
+                        score += this.evaluateWindow(window, player);
+                    }
+                }
+                return score;
+            },
+            
+            evaluateWindow(window, player) {
+                let score = 0;
+                const opponent = player === this.humanPlayer ? this.aiPlayer : this.humanPlayer;
+                const playerCount = window.filter(p => p === player).length;
+                const opponentCount = window.filter(p => p === opponent).length;
+                const emptyCount = window.filter(p => p === 0).length;
+
+                if (playerCount === 4) score += 100;
+                else if (playerCount === 3 && emptyCount === 1) score += 5;
+                else if (playerCount === 2 && emptyCount === 2) score += 2;
+                
+                if (opponentCount === 3 && emptyCount === 1) score -= 4;
+
+                return score;
+            }
         };
 
     const Hangman = {
